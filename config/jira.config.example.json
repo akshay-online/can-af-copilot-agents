@@ -1,0 +1,41 @@
+{
+  "_comment": "Copy to config/jira.config.json and fill in. This file is committed: NO tokens or passwords here. Credentials go in .env (JIRA_EMAIL + JIRA_API_TOKEN for Cloud, JIRA_PAT for Server/Data Center).",
+
+  "base_url": "https://your-company.atlassian.net",
+  "deployment": "cloud",
+
+  "default_project": "DATA",
+  "allowed_projects": ["DATA"],
+
+  "default_issue_type": "Story",
+  "allowed_issue_types": ["Story", "Task", "Bug"],
+
+  "default_labels": ["snowflake", "story-writer"],
+  "default_components": [],
+
+  "epic_link_field": "",
+
+  "fields": {
+    "acceptance_criteria": "",
+    "story_points": ""
+  },
+  "default_fields": {},
+
+  "required_sections": [
+    "Context / Why",
+    "Scope",
+    "Out of scope",
+    "Acceptance criteria",
+    "Definition of Ready",
+    "Definition of Done"
+  ],
+
+  "attachments": {
+    "enabled": true,
+    "allowed_extensions": [".xlsx", ".docx", ".pdf", ".md", ".txt", ".csv"],
+    "max_mb": 10
+  },
+
+  "ca_bundle": "",
+  "timeout_seconds": 30
+}
