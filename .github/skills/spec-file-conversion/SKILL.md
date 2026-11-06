@@ -5,7 +5,7 @@ description: Convert requirement Word documents (.docx) to Markdown and Excel wo
 
 # Spec file conversion
 
-Use the repository's existing converters to prepare Word and Excel inputs for the story-writer. Write all generated files beneath the current draft's `inputs/` output directory; do not write converted artifacts back into `docs/` or beside the source files.
+Use the repository's existing converters to prepare Word and Excel inputs for the story-writer. Write all generated files beneath the spec set's `.jira/drafts/<set-slug>/inputs/` directory; do not write converted artifacts back into `docs/` or beside the source files. Converted files are reference material for the agent only: never name them in a story and never attach them.
 
 The scripts require `python-docx` for Word conversion and `pandas` plus `openpyxl` for Excel conversion. If a converter reports a missing module, ask before installing dependencies, then install the named package with `python -m pip install <package>` and retry.
 

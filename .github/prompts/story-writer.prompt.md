@@ -1,13 +1,11 @@
 ---
 agent: story-writer
-description: Draft a Jira story from spec documents and Excel sheets, get it approved, then create it in Jira
+description: Split spec documents and Excel sheets into one or more concise Jira stories, get each approved, then create them in Jira
 argument-hint: <spec files or folder> [epic key]
 ---
 
-Write a Jira story from these inputs: ${input:sources:spec files or folder, e.g. specs/producer_contract/}
+Write Jira stories from these inputs: ${input:sources:spec files or folder, e.g. docs/producer_contract/}
 
-What I want the agent to do, plus any extra details, assumptions or context I have: ${input:brief:describe the story to write and anything the documents do not say, or leave blank}
+What I want, how many stories (or "recommend"), and any context the documents do not say: ${input:brief:e.g. 2 stories, one for staging+history, one for reporting views; or leave blank}
 
-Save my brief as `.jira/drafts/<slug>/inputs/user-brief.md` and treat it as my instructions. If the brief is blank or unclear, ask me for it before drafting.
-
-Follow the story-writer and spec-file-conversion skills. If no input paths are given, inspect `docs/`; ask which folder to use if it has multiple folders, and ask whether specs are missing or should be added if it is empty. Ask for the shared-folder path to reference in the story, or accept `none`. Convert the inputs and draft `.jira/drafts/<slug>/story.md` from the team template, then stop for my review. Do not create anything in Jira until I have approved the draft and confirmed the project and issue type. After the issue is created, ask which folder to use for attachments, list candidate filenames, and wait for confirmation of the issue key and exact filenames before uploading.
+Follow the story-writer agent workflow. Read the documents, then ask me how many stories are needed, the context of each, any missing details and the shared folder path, asking follow-ups as you go through the documents. Propose a story map and wait for my confirmation before drafting. Each story uses only Description, Acceptance criteria and Dependencies / links, does not list every column, and names only the original documents I shared. Stop for my review of each draft. Do not create anything in Jira until I have approved that draft and confirmed the project and issue type. After each issue is created, propose only the relevant original documents as attachments and wait for my confirmation of the issue key and exact filenames before uploading.

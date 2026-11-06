@@ -48,7 +48,8 @@ python $S attach <draft.md> --confirm-issue KEY --confirm-files "file one.pdf" "
 
 ## What the script does with the draft
 
-- Front matter: `summary`, `project`, `issue_type`, `parent`, `labels`, `components`, `priority`, `story_points`, `attachments`, and script-managed `uploaded_attachments`.
+- Front matter: `summary`, `project`, `issue_type`, `parent`, `labels`, `components`, `priority`, `story_points`, `attachments`, and script-managed `uploaded_attachments`. `sources` is never sent.
+- `story_format: concise` requires exactly `## Description` (with `### Context / Why`, `### Scope`, `### Attachments / documents file path`; optional `### Load rules`, `### Data validations`, `### Masking`), `## Acceptance criteria` and `## Dependencies / links`. Preview FAILs on other sections, on names of working `.csv`/`.md` files, `user-brief`, `story-plan` or `.jira/` paths (file-name patterns with `YYYY`/`<`/`*` are allowed), and on `.csv`/`.md`/`.jira` attachments.
 - Body: HTML comments and the H1 title are removed; Markdown is converted to Jira wiki markup (headings, tables, lists, task boxes as ☐/☑, code blocks, bold, links). The v2 API accepts wiki markup on both Jira Cloud and Data Center.
 - If `fields.acceptance_criteria` is set in config, the *Acceptance criteria* section goes to that custom field instead of the description.
 - `parent`: sent as `parent` (Cloud, and DC sub-tasks) or into `epic_link_field` when that is set (DC Epic Link).

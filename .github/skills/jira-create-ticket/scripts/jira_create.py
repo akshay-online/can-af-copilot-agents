@@ -46,6 +46,10 @@ def find_repo_root():
 ROOT = find_repo_root()
 CONFIG_PATH = Path(os.environ.get("JIRA_CONFIG") or ROOT / "config" / "jira.config.json")
 DESCRIPTION_LIMIT = 32767  # Jira text field limit
+CONCISE_REQUIRED_SUBSECTIONS = ["Context / Why", "Scope", "Attachments / documents file path"]
+CONCISE_SUBSECTIONS = CONCISE_REQUIRED_SUBSECTIONS + ["Load rules", "Data validations", "Masking"]
+INTERNAL_REF = re.compile(r"(?i)[\w.()<>*-]+\.(?:csv|md)\b|\.jira[\\/]|user-brief|story-plan")
+FILE_PATTERN = re.compile(r"(?i)YYYY|MMDD|[<>*]")  # incoming file-name patterns are requirements, not working files
 
 
 def rel(p):
@@ -384,15 +388,39 @@ def build(cfg, meta, body, draft_path):
     pre, secs = split_sections(clean)
     names = {norm(h): (h, t) for h, t in secs}
 
-    missing = [s for s in cfg["required_sections"] if norm(s) not in names]
+    required_sections = (["Description", "Acceptance criteria", "Dependencies / links"]
+                         if meta.get("story_format") == "concise"
+                         else cfg["required_sections"])
+    missing = [s for s in required_sections if norm(s) not in names]
     if missing:
         errors.append("missing required sections: " + ", ".join(missing))
     else:
-        ok.append(f"all {len(cfg['required_sections'])} required sections present ({len(secs)} sections)")
+        ok.append(f"all {len(required_sections)} required sections present ({len(secs)} sections)")
 
     for h, t in secs:
         if not t.strip():
             warnings.append(f"section '{h}' is empty")
+
+    concise = meta.get("story_format") == "concise"
+    if concise:
+        extra_secs = [h for h, _ in secs if norm(h) not in {norm(s) for s in required_sections}]
+        if extra_secs:
+            errors.append("concise story allows only Description, Acceptance criteria, Dependencies / links; "
+                          "remove: " + ", ".join(extra_secs))
+        desc = names.get(norm("Description"))
+        if desc:
+            subs = re.findall(r"(?m)^###[ \t]+(.+?)[ \t]*$", desc[1])
+            allowed_subs = {norm(s) for s in CONCISE_SUBSECTIONS}
+            unknown = [s for s in subs if norm(s) not in allowed_subs]
+            if unknown:
+                errors.append("Description has subsections outside the concise format: " + ", ".join(unknown))
+            missing_subs = [s for s in CONCISE_REQUIRED_SUBSECTIONS if norm(s) not in {norm(x) for x in subs}]
+            if missing_subs:
+                errors.append("Description is missing: " + ", ".join(missing_subs))
+        internal = sorted(set(m.group(0) for m in INTERNAL_REF.finditer(clean)
+                              if not FILE_PATTERN.search(m.group(0))))
+        if internal:
+            errors.append("story references working files that must not reach Jira: " + ", ".join(internal[:5]))
 
     ac = names.get(norm("Acceptance criteria"))
     if ac:
@@ -472,6 +500,9 @@ def build(cfg, meta, body, draft_path):
             errors.append(f"attachment type not allowed: {p.name}")
         elif p.stat().st_size > max_mb * 1024 * 1024:
             errors.append(f"attachment over {max_mb:g} MB: {p.name}")
+        elif meta.get("story_format") == "concise" and (
+                p.suffix.lower() in (".csv", ".md") or ".jira" in p.resolve().parts):
+            errors.append(f"attachment is a working/reference file, attach the original document instead: {p.name}")
         else:
             files.append(p)
     if files and not att_cfg.get("enabled", True):

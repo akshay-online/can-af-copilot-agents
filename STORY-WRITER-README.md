@@ -8,7 +8,8 @@ Add-on for the Snowflake Copilot kit. It reads the business inputs (Word require
   ├─ user brief            what to write + extra details, saved to inputs/user-brief.md (asked if missing)
   ├─ spec-file-conversion  docx → Markdown; xlsx/xlsm → one CSV per sheet
   ├─ read_inputs.py        sample CSV → Markdown metadata (headers + row count only)
-   ├─ draft story.md        team template, sources cited, unknowns = ⚠ TBC + Open questions
+   ├─ interview + story map  how many stories, context of each; user confirms the split
+   ├─ draft story.md (each)  Description / Acceptance criteria / Dependencies only; original document names only
    ├─ preview --offline     lint: required sections, Given/When/Then, no TODOs, size
    │
    ├─ GATE 1  human reviews the draft in chat → "approved"  → status: approved
@@ -61,12 +62,13 @@ In Copilot Chat (Agent mode):
 /story-writer specs/producer_contract/        (or attach the files, or name them)
 ```
 
-1. Describe what you want the story to cover in the **brief** field of the prompt, or type it in chat. Add any details the documents do not give (context, assumptions, decisions already made). If you leave it out, the agent asks for it. The brief is saved to `.jira/drafts/<slug>/inputs/user-brief.md`.
-2. The agent uses supplied files, or scans `docs/` when none are named; it asks which folder if `docs/` has multiple folders, and asks about missing/new specs if it is empty. It asks for a shared-folder path to reference in the story, or `none`.
-3. It writes converted Word Markdown and per-sheet Excel CSVs to `.jira/drafts/<slug>/inputs/`, then drafts `.jira/drafts/<slug>/story.md` following your brief, and shows the Definition of Ready (✔/✘), open questions and lint warnings. Conflicts between your brief and the documents are listed as open questions.
-4. Read the draft, ask for changes in chat, repeat. Reply **approved** when it's right.
-5. It shows the target and asks you to confirm the project and issue type. Attachments are selected after creation.
-6. After creation, choose the shared folder, selected `docs/<folder>`, or another local path. Confirm the exact filenames before they are uploaded to the new issue.
+1. Point the agent at the specs, and optionally say in the **brief** how many stories you want and what each should cover.
+2. The agent uses supplied files, or scans `docs/` when none are named; it asks which folder if `docs/` has multiple folders, and asks about missing/new specs if it is empty.
+3. It converts the documents into `.jira/drafts/<set-slug>/inputs/` (reference only), then asks how many stories, the context of each, missing details and the shared-folder path, with follow-up questions as it reads. It proposes a **story map** (`story-plan.md`) and waits for you to confirm the split.
+4. For each story it drafts `.jira/drafts/<story-slug>/story.md` with only **Description** (Context / Why, Scope, Attachments / documents path, and Load rules / Data validations / Masking when needed), **Acceptance criteria** and **Dependencies / links**. Columns stay in the Excel file; only original document names appear.
+5. Read the draft, ask for changes in chat, repeat. Reply **approved** when it's right. Each story is approved separately.
+6. It shows the target and asks you to confirm the project and issue type, then creates the issue.
+7. After creation, it proposes only the relevant original documents as attachments. Confirm the exact filenames before they are uploaded. Steps 5–7 repeat for each story.
 
 
 The agent never asks for the Jira URL, email or token.
@@ -80,7 +82,8 @@ The agent never asks for the Jira URL, email or token.
 | Duplicates | After creation the key is written into the draft; a second `create` is refused |
 | Secrets leaking | Credentials only in `.env`; script never prints them; config with a token is rejected |
 | Data values reaching Copilot | CSVs are reduced to headers and row counts; large Excel data sheets are truncated with a warning |
-| Invented requirements | Template and skill require a source citation per fact and `⚠ TBC` + Open question for anything missing |
+| Invented requirements | The agent asks the user about every unclear point while reading; remaining gaps are `⚠ TBC` with an owner in Dependencies / links |
+| Working files leaking into Jira | Preview fails if a concise story names converted `.csv`/`.md` files, briefs, story maps or `.jira/` paths, or attaches them |
 | Prompt injection from documents | Agent treats document text as data; approval only counts from the user's chat messages |
 
 ## Audit and enforced gates
