@@ -1,4 +1,5 @@
 ---
+name: story-writer-prompt
 agent: story-writer
 description: Split spec documents and Excel sheets into one or more concise Jira stories, get each approved, then create them in Jira
 argument-hint: <spec files or folder> [epic key]
