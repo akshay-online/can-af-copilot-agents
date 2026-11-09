@@ -3,7 +3,7 @@
 Add-on for the Snowflake Copilot kit. It reads the business inputs (Word requirements, Excel column spec, sample CSVs), drafts a Jira story in the team template, waits for a human to approve it, confirms the target project and issue type, and creates the story through the Jira REST API. No Jira MCP needed.
 
 ```
-/story-writer <spec files or folder> — then describe what you want in the brief field (or in chat)
+/story-writer-prompt <spec files or folder> — then describe what you want in the brief field (or in chat)
    │
   ├─ user brief            what to write + extra details, saved to inputs/user-brief.md (asked if missing)
   ├─ spec-file-conversion  docx → Markdown; xlsx/xlsm → one CSV per sheet
@@ -86,9 +86,13 @@ The agent never asks for the Jira URL, email or token.
 | Working files leaking into Jira | Preview fails if a concise story names converted `.csv`/`.md` files, briefs, story maps or `.jira/` paths, or attaches them |
 | Prompt injection from documents | Agent treats document text as data; approval only counts from the user's chat messages |
 
-## Audit and enforced gates
+## Guardrails (enforced, not just instructions)
 
-`.github/hooks/` logs every agent interaction (session start/end, prompts, every tool call and its result, stops, subagents, errors) and enforces the two gates at tool level: an agent cannot write `status: approved` unless the user's last message approved the draft, and `jira_create.py create` is denied for unapproved or already-created drafts and needs a final confirmation otherwise. See `HOOKS-README.md`.
+`.github/hooks/` blocks risky tool calls before they run — it does not log prompts, tool
+arguments, tool results or transcripts anywhere. Two things are enforced at tool level: an agent
+cannot write `status: approved` unless the user's last chat message approved the draft, and
+`jira_create.py create` is denied for unapproved or already-created drafts and needs a final
+confirmation otherwise. See `HOOKS-README.md`.
 
 ## Notes
 

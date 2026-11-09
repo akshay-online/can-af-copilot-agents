@@ -1,60 +1,99 @@
 {
-  "_comment": "Audit + guard policy for Copilot agent hooks. Edited by the tech lead; agents cannot edit .github/hooks/ (see protected_write).",
-
-  "log_dir": "logs/copilot-audit",
-  "retention_days": 90,
-  "log_prompts": true,
-  "log_tool_arguments": true,
-  "log_tool_results": true,
-  "log_assistant_messages": true,
-  "request_decision_summary": true,
-  "max_content_chars": 0,
-  "max_transcript_bytes_per_event": 16777216,
-  "max_field_chars": 2000,
-  "result_excerpt_chars": 500,
-  "mask_emails_in_content": true,
-
-  "agents": {
-    "story-writer": ["/story-writer", "story-writer", "read_inputs.py", "jira_create.py", ".jira/drafts/"],
-    "dev": ["/dev "],
-    "unit-test": ["/unit-test"],
-    "review": ["/review"],
-    "deploy-to-dev": ["/deploy-to-dev", "deploy_dev.sh"],
-    "QA": ["/QA "],
-    "jira-ticket": ["/jira-ticket", "jira_fetch.py"]
-  },
-
-  "notify": {
-    "webhook_env": "COPILOT_AUDIT_WEBHOOK",
-    "on": ["errorOccurred", "sessionEnd", "deny"]
-  },
-
-  "protected_read": [".env", ".env.*", "**/.env", "**/.env.*", "**/connections.toml"],
-  "protected_read_exceptions": [".env.example", "**/.env.example", "**/connections.example.toml"],
-  "protected_write": [".env", ".env.*", "**/.env", "config/jira.config.json", ".github/hooks/**", "**/connections.toml"],
-  "protected_write_exceptions": [".env.example"],
-
+  "_comment": "Guardrail policy for Copilot agent hooks. Edited by the tech lead; agents cannot edit .github/hooks/ (see protected_write). This hook only allows/asks/denies tool calls - it does not log prompts, tool arguments or results anywhere.",
+  "protected_read": [
+    ".env",
+    ".env.*",
+    "**/.env",
+    "**/.env.*",
+    "**/connections.toml"
+  ],
+  "protected_read_exceptions": [
+    ".env.example",
+    "**/.env.example",
+    "**/connections.example.toml"
+  ],
+  "protected_write": [
+    ".env",
+    ".env.*",
+    "**/.env",
+    "config/jira.config.json",
+    ".github/hooks/**",
+    "**/connections.toml"
+  ],
+  "protected_write_exceptions": [
+    ".env.example"
+  ],
   "jira_create_gate": {
     "enabled": true,
     "decision_when_approved": "ask"
   },
-
   "deny_commands": [
-    {"id": "SEC-1", "pattern": "\\b(cat|type|more|less|head|tail|bat|strings|get-content|gc|nl|xxd|od)\\b[^|;&\\n]*(^|[\\s/\\\\\"'])\\.env(?!\\.example)\\b", "reason": "Reading .env is blocked: it holds credentials. Scripts read it themselves."},
-    {"id": "SEC-2", "pattern": "(^|[;&|]\\s*)(printenv|env|set|gci\\s+env:|get-childitem\\s+env:)\\s*($|[|;&])", "reason": "Dumping environment variables is blocked: they may hold credentials."},
-    {"id": "SEC-3", "pattern": "(\\$\\{?|\\$env:)(jira_api_token|jira_pat|jira_email|snowflake_password|github_token)\\b", "reason": "Printing credential variables is blocked."},
-    {"id": "SEC-4", "pattern": "\\b(curl|wget|invoke-restmethod|invoke-webrequest|irm|iwr|http)\\b[^\\n]*(atlassian\\.net|/rest/api/|jira)", "reason": "Call Jira only through the kit scripts (jira_fetch.py, jira_create.py), never with raw HTTP and a token on the command line."},
-    {"id": "SEC-5", "pattern": "(>|>>|\\btee\\b|\\bsed\\s+-i|set-content|add-content|out-file|\\bcp\\b|\\bmv\\b|\\brm\\b|\\bdel\\b|copy-item|move-item|remove-item)[^|;&\\n]*(\\.env(?!\\.example)\\b|config/jira\\.config\\.json|\\.github[/\\\\]hooks)", "reason": "Changing .env, the Jira config or the audit hooks from an agent is blocked."},
-    {"id": "GIT-1", "pattern": "\\bgit\\s+push\\b[^\\n]*(--force\\b|--force-with-lease\\b|\\s-f\\b)", "reason": "Force push is blocked."},
-    {"id": "GIT-2", "pattern": "\\bgit\\s+(commit|push)\\b[^\\n]*--no-verify", "reason": "--no-verify skips the Jira-key commit hook; it is blocked."},
-    {"id": "GIT-3", "pattern": "\\bgit\\s+add\\b[^\\n]*(\\s-f\\b|--force|\\.env(?!\\.example)\\b|\\.jira[/\\\\]|logs[/\\\\]copilot-audit)", "reason": "Adding .env, .jira/ or audit logs to git is blocked."},
-    {"id": "FS-1", "pattern": "\\brm\\s+-[a-z]*r[a-z]*\\s+(/|~|\\$home|\\*|\\.\\.?)(\\s|$|/\\s*$)", "reason": "Recursive delete of the repo, home or root is blocked."},
-    {"id": "SF-1", "pattern": "\\bsnow(sql)?\\b[^\\n]*(\\s-c\\s+|--connection[\\s=]+|-a\\s+)['\"]?(?!dev\\b)[\\w.-]+", "reason": "Snowflake commands may only use the 'dev' connection. Higher environments go through the release pipeline."},
-    {"id": "SF-2", "pattern": "\\bsnow(sql)?\\b[^\\n]*\\b(drop\\s+(table|schema|database|stage)|truncate\\s+table|create\\s+or\\s+replace\\s+(transient\\s+)?table|delete\\s+from\\s+hist\\.)", "reason": "Destructive Snowflake SQL from the terminal is blocked. Use /deploy-to-dev, which plans first and blocks these statements."}
+    {
+      "id": "SEC-1",
+      "pattern": "\\b(cat|type|more|less|head|tail|bat|strings|get-content|gc|nl|xxd|od)\\b[^|;&\\n]*(^|[\\s/\\\\\"'])\\.env(?!\\.example)\\b",
+      "reason": "Reading .env is blocked: it holds credentials. Scripts read it themselves."
+    },
+    {
+      "id": "SEC-2",
+      "pattern": "(^|[;&|]\\s*)(printenv|env|set|gci\\s+env:|get-childitem\\s+env:)\\s*($|[|;&])",
+      "reason": "Dumping environment variables is blocked: they may hold credentials."
+    },
+    {
+      "id": "SEC-3",
+      "pattern": "(\\$\\{?|\\$env:)(jira_api_token|jira_pat|jira_email|snowflake_password|github_token)\\b",
+      "reason": "Printing credential variables is blocked."
+    },
+    {
+      "id": "SEC-4",
+      "pattern": "\\b(curl|wget|invoke-restmethod|invoke-webrequest|irm|iwr|http)\\b[^\\n]*(atlassian\\.net|/rest/api/|jira)",
+      "reason": "Call Jira only through the kit scripts (jira_fetch.py, jira_create.py), never with raw HTTP and a token on the command line."
+    },
+    {
+      "id": "SEC-5",
+      "pattern": "(>|>>|\\btee\\b|\\bsed\\s+-i|set-content|add-content|out-file|\\bcp\\b|\\bmv\\b|\\brm\\b|\\bdel\\b|copy-item|move-item|remove-item)[^|;&\\n]*(\\.env(?!\\.example)\\b|config/jira\\.config\\.json|\\.github[/\\\\]hooks)",
+      "reason": "Changing .env, the Jira config or the audit hooks from an agent is blocked."
+    },
+    {
+      "id": "GIT-1",
+      "pattern": "\\bgit\\s+push\\b[^\\n]*(--force\\b|--force-with-lease\\b|\\s-f\\b)",
+      "reason": "Force push is blocked."
+    },
+    {
+      "id": "GIT-2",
+      "pattern": "\\bgit\\s+(commit|push)\\b[^\\n]*--no-verify",
+      "reason": "--no-verify skips the Jira-key commit hook; it is blocked."
+    },
+    {
+      "id": "GIT-3",
+      "pattern": "\\bgit\\s+add\\b[^\\n]*(\\s-f\\b|--force|\\.env(?!\\.example)\\b|\\.jira[/\\\\]|logs[/\\\\]copilot-audit)",
+      "reason": "Adding .env, .jira/ or audit logs to git is blocked."
+    },
+    {
+      "id": "FS-1",
+      "pattern": "\\brm\\s+-[a-z]*r[a-z]*\\s+(/|~|\\$home|\\*|\\.\\.?)(\\s|$|/\\s*$)",
+      "reason": "Recursive delete of the repo, home or root is blocked."
+    },
+    {
+      "id": "SF-1",
+      "pattern": "\\bsnow(sql)?\\b[^\\n]*(\\s-c\\s+|--connection[\\s=]+|-a\\s+)['\"]?(?!dev\\b)[\\w.-]+",
+      "reason": "Snowflake commands may only use the 'dev' connection. Higher environments go through the release pipeline."
+    },
+    {
+      "id": "SF-2",
+      "pattern": "\\bsnow(sql)?\\b[^\\n]*\\b(drop\\s+(table|schema|database|stage)|truncate\\s+table|create\\s+or\\s+replace\\s+(transient\\s+)?table|delete\\s+from\\s+hist\\.)",
+      "reason": "Destructive Snowflake SQL from the terminal is blocked. Use /deploy-to-dev, which plans first and blocks these statements."
+    }
   ],
-
   "ask_commands": [
-    {"id": "ASK-1", "pattern": "\\bdeploy_dev\\.sh\\b[^\\n]*--execute", "reason": "This writes to Snowflake DEV. Confirm?"},
-    {"id": "ASK-2", "pattern": "\\bgit\\s+push\\b", "reason": "Push to the remote. Confirm?"}
+    {
+      "id": "ASK-1",
+      "pattern": "\\bdeploy_dev\\.sh\\b[^\\n]*--execute",
+      "reason": "This writes to Snowflake DEV. Confirm?"
+    },
+    {
+      "id": "ASK-2",
+      "pattern": "\\bgit\\s+push\\b",
+      "reason": "Push to the remote. Confirm?"
+    }
   ]
 }
