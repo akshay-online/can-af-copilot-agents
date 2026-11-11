@@ -18,18 +18,18 @@ inputs ─► convert ─► interview + story map ─► per story: draft ─�
 |---|---|
 | `templates/story-template.md` | The structure every story must have. Copy it; never invent a different layout |
 | `examples/producer-contract-story.md` | A complete concise story. Match its level of detail |
-| `../spec-file-conversion/SKILL.md` | Converts .docx to Markdown and .xlsx/.xlsm sheets to CSV in the draft output directory |
+| `../spec-file-conversion/SKILL.md` | Converts .docx to Markdown and .xlsx/.xlsm sheets to CSV in `inputs/<spec-folder-name>/`, with collision checks |
 | `scripts/read_inputs.py` | Converts sample CSV files to Markdown headers and row counts only |
 | `../jira-create-ticket/` | Lints, previews and creates the story in Jira (see that skill) |
 
 ## Step 1. Read the inputs
 
-Use the user's supplied paths, or scan `docs/` when none are supplied. If `docs/` has multiple folders, ask which one to use; if it is empty, ask whether files are missing or the user wants to add specs. Pick a spec-set slug, e.g. `producer-contract`, and convert into `.jira/drafts/<set-slug>/inputs/`:
+Use the user's supplied paths, or scan `docs/` when none are supplied. If `docs/` has multiple folders, ask which one to use; if it is empty, ask whether files are missing or the user wants to add specs. Pick a spec-set slug, e.g. `producer-contract`, and convert into `.jira/drafts/<set-slug>/inputs/<spec-folder-name>/`, using the source specs directory's name for `<spec-folder-name>`. If the user supplied separate files with a common parent, use that parent's name; if there is no common parent, ask which folder name to use. Before conversion, check for same-path/name files and compare contents in the destination. Ask whether to use existing matching inputs or reconvert and overwrite; ask before overwriting any collision, including different content. Never overwrite without the user's explicit choice.
 
 ```bash
-python scripts/word_to_md.py <word-file.docx> .jira/drafts/<set-slug>/inputs
-python scripts/excel_to_csv.py <workbook.xlsx> .jira/drafts/<set-slug>/inputs
-python .github/skills/story-writer/scripts/read_inputs.py <sample.csv> --out .jira/drafts/<set-slug>/inputs
+python scripts/word_to_md.py <word-file.docx> .jira/drafts/<set-slug>/inputs/<spec-folder-name>
+python scripts/excel_to_csv.py <workbook.xlsx> .jira/drafts/<set-slug>/inputs/<spec-folder-name>
+python .github/skills/story-writer/scripts/read_inputs.py <sample.csv> --out .jira/drafts/<set-slug>/inputs/<spec-folder-name>
 ```
 
 Follow `.github/skills/spec-file-conversion/SKILL.md` for conversion details. Read every generated Word Markdown file and Excel sheet CSV. For sample CSVs, use `read_inputs.py` (headers and row counts only); never open a raw sample CSV or copy row values into a story — this applies even when you just want to inspect structure. If a CSV embeds reference/legend data (e.g. a code-to-name mapping) needed as a business rule, state your proposed reading of it to the user as a question and get it confirmed rather than inferring it from raw rows yourself. If the only input is a sample CSV with no Word/Excel/PDF spec, tell the user up front that no attachment step will be possible for these stories (sample CSVs are never named or attached). Read `.md` and `.txt` sources directly. Converted files are **your reference only**: never name them in a story and never attach them. Keep the original source paths for the attachment step.
