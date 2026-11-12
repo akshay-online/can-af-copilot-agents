@@ -98,6 +98,14 @@ class GuardTests(unittest.TestCase):
         cmd = f'python jira_create.py create "{path}" --confirm-project DATA --confirm-type Story'
         self.assertEqual(self.pre("run_in_terminal", command=cmd), "deny")   # already created
 
+    def test_jira_2_parent_link_requires_confirmation(self):
+        cmd = "python jira_create.py set-parent --parent DATA-42 --issues DATA-101 DATA-102"
+        out = self.pre("run_in_terminal", command=cmd)
+        self.assertEqual(out, "ask")
+
+        cmd = "python jira_create.py set-parent --parent DATA-42 --issues not-a-key"
+        self.assertEqual(self.pre("run_in_terminal", command=cmd), "deny")
+
     def test_unrelated_tools_are_allowed(self):
         self.assertEqual(self.pre("grep_search", query="TODO"), "allow")
         self.assertEqual(self.pre("read_file", path="README.md"), "allow")
@@ -123,4 +131,3 @@ class GuardTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

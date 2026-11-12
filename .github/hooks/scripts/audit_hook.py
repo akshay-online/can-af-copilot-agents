@@ -208,6 +208,31 @@ def jira_create_gate(cmd):
     return decision, f"Create Jira {itype} in project {proj} from {rel_posix(p)}?"
 
 
+def jira_parent_gate(cmd):
+    """Require confirmation before changing existing Jira parent relationships."""
+    if not re.search(r"jira_create\.py[\"']?\s+set-parent\b", cmd):
+        return None
+    if re.search(r"(?<!\S)(?:--help|-h)(?!\S)", cmd):
+        return None
+    try:
+        tokens = shlex.split(cmd, posix=os.name != "nt")
+    except ValueError:
+        tokens = cmd.split()
+    tokens = [t.strip("\"'") for t in tokens]
+    parent = tokens[tokens.index("--parent") + 1] if "--parent" in tokens[:-1] else None
+    issues = []
+    if "--issues" in tokens[:-1]:
+        i = tokens.index("--issues") + 1
+        while i < len(tokens) and not tokens[i].startswith("--"):
+            issues.append(tokens[i])
+            i += 1
+    key_pattern = re.compile(r"[A-Z][A-Z0-9_]+-\d+")
+    if not parent or not key_pattern.fullmatch(parent) or not issues or \
+            any(not key_pattern.fullmatch(key) for key in issues):
+        return "deny", "jira_create.py set-parent needs --parent FEATURE-KEY and one or more --issues STORY-KEY values."
+    return "ask", "Make these Stories children of Jira Feature " + parent + "? " + ", ".join(issues)
+
+
 APPROVAL = re.compile(r"(?i)^\W*(approved?|lgtm|looks good|ship it|go ahead and create|yes,? create)\b")
 NOT_APPROVAL = re.compile(r"(?i)\b(not|don'?t|do not|isn'?t|no)\b[^.]{0,20}\b(approve|create|good)")
 CONTENT_KEYS = ("new_str", "newString", "new_string", "content", "file_text", "text", "code", "patch", "input",
@@ -248,6 +273,9 @@ def decide(tool_name, raw_cmd, kind, paths, args, approved):
         gate = jira_create_gate(raw_cmd)
         if gate:
             return gate[0], "JIRA-1", gate[1]
+        gate = jira_parent_gate(raw_cmd)
+        if gate:
+            return gate[0], "JIRA-2", gate[1]
         for rule in POLICY.get("ask_commands", []):
             try:
                 if re.search(rule["pattern"], low):
@@ -321,4 +349,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

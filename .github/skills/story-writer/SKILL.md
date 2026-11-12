@@ -62,9 +62,9 @@ For each story in the map, create `.jira/drafts/<story-slug>/story.md` from the 
 4. **Original names only.** Refer to documents by the names the user shared (e.g. *PRODUCER_CONTRACT requirements*, `PRODUCER_CONTRACT_spec_v1.0.xlsx`). Never write converted `.csv`/`.md` file names, `user-brief`, `story-plan` or `.jira/` paths; preview fails on them. No `[source]` citations in the body.
 5. **Attachments / documents file path:** the shared folder path (or `none`) and the original document names this story relies on.
 6. **Acceptance criteria** are `AC-n`, Given / When / Then, each checkable with a query or a count, covering only this story's scope.
-7. **Dependencies / links:** other stories from the map (with keys once created), access needed, and any remaining gap as `⚠ TBC – <question> (owner: PO/BA/tech lead)`. Ask the user about gaps first.
+7. **Dependencies / links:** other stories from the map (with keys once created), the parent Feature/Epic key when supplied, access needed, and any remaining gap as `⚠ TBC – <question> (owner: PO/BA/tech lead)`. Ask the user about gaps first.
 8. **Names** follow `docs/STANDARDS.md` and `snowflake/claim_detail/` (`STG.<E>_STG`, `HIST.<E>_HIST`, `PRC.<E>`, `UTIL.SP_LOAD_STG_<E>` …). If neither exists in the repo, infer names from `examples/producer-contract-story.md` and confirm the proposed object names with the user in the interview before drafting.
-9. **Front matter:** fill `summary` (max 255 chars), `labels`, `components`, `parent` (only if the user named the epic). `sources` is internal traceability and is never sent to Jira. Leave `attachments: []`, `status: draft`, `project` empty and `jira_key` empty.
+9. **Front matter:** fill `summary` (max 255 chars), `labels`, `components`, and `parent` with the user's Feature or Epic key when provided. `sources` is internal traceability and is never sent to Jira. Leave `attachments: []`, `status: draft`, `project` empty and `jira_key` empty.
 10. Replace every `TODO`.
 
 Then lint it without touching Jira:
