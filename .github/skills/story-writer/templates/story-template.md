@@ -4,7 +4,7 @@ story_format: concise
 summary: TODO <ENTITY>: <what is built, in one line, max 255 chars>
 project:  # leave empty to use default_project from config/jira.config.json
 issue_type: Story
-parent:  # epic / feature key, e.g. DATA-120, or empty
+parent:  # parent Feature or Epic key, e.g. DATA-120, or empty
 labels: [snowflake]
 components: []
 priority:

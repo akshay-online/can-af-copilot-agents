@@ -12,6 +12,8 @@ Commands
                                             create the issue (draft must be status: approved)
     attach  <draft.md> --confirm-issue K --confirm-files NAME [NAME ...]
                                                                                         upload confirmed attachments to an already-created issue
+  set-parent --parent FEATURE-123 --issues STORY-123 [STORY-124 ...]
+                                            make existing Stories children of a Feature
 
 Exit codes: 0 ok, 1 Jira/API error, 2 config/usage error, 3 draft not ready (lint/approval/confirm).
 """
@@ -694,6 +696,84 @@ def cmd_attach(cfg, args):
     return 1 if failed else 0
 
 
+def issue_parent(fields, cfg):
+    value = fields.get(cfg.get("epic_link_field")) if cfg.get("epic_link_field") else fields.get("parent")
+    if isinstance(value, dict):
+        return value.get("key")
+    return value if isinstance(value, str) else None
+
+
+def fetch_issue_for_parent(cfg, key):
+    requested_fields = ["project", "issuetype", "parent"]
+    if cfg.get("epic_link_field"):
+        requested_fields.append(cfg["epic_link_field"])
+    try:
+        issue = api(cfg, "GET", f"/rest/api/2/issue/{key}?fields={','.join(requested_fields)}")
+    except JiraError as e:
+        die(f"Could not read issue {key}: {e.explain()}", 1)
+    fields = issue.get("fields") or {}
+    project = (fields.get("project") or {}).get("key")
+    issue_type = (fields.get("issuetype") or {}).get("name")
+    if not project or not issue_type:
+        die(f"Jira did not return the project and issue type for {key}; no issues were changed.", 1)
+    return {"key": issue.get("key", key), "project": project, "type": issue_type,
+            "parent": issue_parent(fields, cfg)}
+
+
+def cmd_set_parent(cfg, args):
+    key_pattern = re.compile(r"[A-Z][A-Z0-9_]+-\d+")
+    parent_key = args.parent
+    story_keys = args.issues
+    if not key_pattern.fullmatch(parent_key):
+        die(f"Feature key '{parent_key}' is not a Jira key.", 2)
+    if any(not key_pattern.fullmatch(key) for key in story_keys):
+        die("Every value passed to --issues must be a Jira key.", 2)
+    if len(set(story_keys)) != len(story_keys):
+        die("--issues contains duplicate Jira keys.", 2)
+    if parent_key in story_keys:
+        die("The Feature key cannot also appear in --issues.", 2)
+
+    parent = fetch_issue_for_parent(cfg, parent_key)
+    if parent["type"].casefold() != "feature":
+        die(f"{parent_key} is a {parent['type']}, not a Feature; no Stories were changed.", 3)
+    if parent["project"] not in cfg["allowed_projects"]:
+        die(f"Feature {parent_key} is in project {parent['project']}, which is not in allowed_projects; "
+            "no Stories were changed.", 3)
+
+    children = [fetch_issue_for_parent(cfg, key) for key in story_keys]
+    invalid = [f"{item['key']} ({item['type']} in {item['project']})"
+               for item in children
+               if item["type"].casefold() != "story" or item["project"] != parent["project"]]
+    if invalid:
+        die("All child issues must be Stories in the Feature's project. Invalid: "
+            + ", ".join(invalid) + "; no Stories were changed.", 3)
+
+    conflicts = [f"{item['key']} already has parent {item['parent']}"
+                 for item in children if item["parent"] and item["parent"] != parent_key]
+    if conflicts:
+        die("Refusing to replace existing parents. Resolve these Stories first: "
+            + "; ".join(conflicts) + ". No Stories were changed.", 3)
+
+    pending = [item for item in children if item["parent"] != parent_key]
+    if not pending:
+        print(f"Already linked: {', '.join(story_keys)} are children of {parent_key}.")
+        return 0
+
+    parent_fields = ({cfg["epic_link_field"]: parent_key} if cfg.get("epic_link_field")
+                     else {"parent": {"key": parent_key}})
+    updated = []
+    for item in pending:
+        try:
+            api(cfg, "PUT", f"/rest/api/2/issue/{item['key']}", body={"fields": parent_fields})
+        except JiraError as e:
+            done = f" Completed before the failure: {', '.join(updated)}." if updated else ""
+            die(f"Could not set parent of {item['key']} to {parent_key}: {e.explain()}.{done} "
+                "Any earlier successful updates are listed above; do not retry those.", 1)
+        updated.append(item["key"])
+        print(f"LINKED {item['key']} as a child of {parent_key}")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description="Create a Jira story from an approved draft (REST API v2).")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -711,10 +791,13 @@ def main():
     a.add_argument("draft")
     a.add_argument("--confirm-issue", required=True)
     a.add_argument("--confirm-files", required=True, nargs="+")
+    lp = sub.add_parser("set-parent", help="make existing Stories children of a Feature")
+    lp.add_argument("--parent", required=True, help="existing Jira Feature key")
+    lp.add_argument("--issues", required=True, nargs="+", help="existing Jira Story keys to make children")
     args = ap.parse_args()
     cfg = load_config()
     sys.exit({"check": cmd_check, "preview": cmd_preview, "create": cmd_create,
-              "attach": cmd_attach}[args.cmd](cfg, args))
+              "attach": cmd_attach, "set-parent": cmd_set_parent}[args.cmd](cfg, args))
 
 
 if __name__ == "__main__":

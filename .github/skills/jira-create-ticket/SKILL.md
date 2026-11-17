@@ -36,6 +36,11 @@ python $S attach <draft.md> --confirm-issue KEY --confirm-files "file one.pdf" "
 #   uploads the exact confirmed files in the draft's attachments list to an existing issue.
 #   Requires status: created, a matching jira_key, and an exact match between confirmed filenames
 #   and validated attachment filenames. Successful paths are recorded in uploaded_attachments.
+
+python $S set-parent --parent FEATURE-123 --issues STORY-123 [STORY-124 ...]
+#   makes existing Stories children of an existing Feature. Confirm the exact keys with the user
+#   first; the audit hook also asks before the Jira update. Refuses wrong issue types, cross-project
+#   links, and Stories that already have a different parent.
 ```
 
 ## Rules for the agent
@@ -54,6 +59,7 @@ python $S attach <draft.md> --confirm-issue KEY --confirm-files "file one.pdf" "
 - If `fields.acceptance_criteria` is set in config, the *Acceptance criteria* section goes to that custom field instead of the description.
 - `parent`: sent as `parent` (Cloud, and DC sub-tasks) or into `epic_link_field` when that is set (DC Epic Link).
 - `default_fields` in config are added to every issue (for example a team field).
+- To create a new Story under a Feature, set the Feature key in the draft's `parent` field and include it in the target-confirmation gate. To make existing Stories children of a Feature, use `set-parent`; this updates the Jira parent field and does not create a generic issue link. Jira must support the configured Feature-to-Story hierarchy. Never replace a different existing parent automatically.
 
 ## Troubleshooting
 
