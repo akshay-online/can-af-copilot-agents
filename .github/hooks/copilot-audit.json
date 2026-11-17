@@ -1,24 +1,6 @@
 {
   "version": 1,
   "hooks": {
-    "sessionStart": [
-      {
-        "type": "command",
-        "bash": "py=$(command -v python3 || command -v python); \"$py\" .github/hooks/scripts/audit_hook.py sessionStart",
-        "powershell": "if (Get-Command python -ErrorAction SilentlyContinue) { python .github/hooks/scripts/audit_hook.py sessionStart } else { py -3 .github/hooks/scripts/audit_hook.py sessionStart }; exit $LASTEXITCODE",
-        "cwd": ".",
-        "timeoutSec": 10
-      }
-    ],
-    "sessionEnd": [
-      {
-        "type": "command",
-        "bash": "py=$(command -v python3 || command -v python); \"$py\" .github/hooks/scripts/audit_hook.py sessionEnd",
-        "powershell": "if (Get-Command python -ErrorAction SilentlyContinue) { python .github/hooks/scripts/audit_hook.py sessionEnd } else { py -3 .github/hooks/scripts/audit_hook.py sessionEnd }; exit $LASTEXITCODE",
-        "cwd": ".",
-        "timeoutSec": 30
-      }
-    ],
     "userPromptSubmitted": [
       {
         "type": "command",
@@ -35,69 +17,6 @@
         "powershell": "if (Get-Command python -ErrorAction SilentlyContinue) { python .github/hooks/scripts/audit_hook.py preToolUse } else { py -3 .github/hooks/scripts/audit_hook.py preToolUse }; exit $LASTEXITCODE",
         "cwd": ".",
         "timeoutSec": 15
-      }
-    ],
-    "postToolUse": [
-      {
-        "type": "command",
-        "bash": "py=$(command -v python3 || command -v python); \"$py\" .github/hooks/scripts/audit_hook.py postToolUse",
-        "powershell": "if (Get-Command python -ErrorAction SilentlyContinue) { python .github/hooks/scripts/audit_hook.py postToolUse } else { py -3 .github/hooks/scripts/audit_hook.py postToolUse }; exit $LASTEXITCODE",
-        "cwd": ".",
-        "timeoutSec": 10
-      }
-    ],
-    "postToolUseFailure": [
-      {
-        "type": "command",
-        "bash": "py=$(command -v python3 || command -v python); \"$py\" .github/hooks/scripts/audit_hook.py postToolUseFailure",
-        "powershell": "if (Get-Command python -ErrorAction SilentlyContinue) { python .github/hooks/scripts/audit_hook.py postToolUseFailure } else { py -3 .github/hooks/scripts/audit_hook.py postToolUseFailure }; exit $LASTEXITCODE",
-        "cwd": ".",
-        "timeoutSec": 15
-      }
-    ],
-    "agentStop": [
-      {
-        "type": "command",
-        "bash": "py=$(command -v python3 || command -v python); \"$py\" .github/hooks/scripts/audit_hook.py agentStop",
-        "powershell": "if (Get-Command python -ErrorAction SilentlyContinue) { python .github/hooks/scripts/audit_hook.py agentStop } else { py -3 .github/hooks/scripts/audit_hook.py agentStop }; exit $LASTEXITCODE",
-        "cwd": ".",
-        "timeoutSec": 30
-      }
-    ],
-    "subagentStart": [
-      {
-        "type": "command",
-        "bash": "py=$(command -v python3 || command -v python); \"$py\" .github/hooks/scripts/audit_hook.py subagentStart",
-        "powershell": "if (Get-Command python -ErrorAction SilentlyContinue) { python .github/hooks/scripts/audit_hook.py subagentStart } else { py -3 .github/hooks/scripts/audit_hook.py subagentStart }; exit $LASTEXITCODE",
-        "cwd": ".",
-        "timeoutSec": 10
-      }
-    ],
-    "preCompact": [
-      {
-        "type": "command",
-        "bash": "py=$(command -v python3 || command -v python); \"$py\" .github/hooks/scripts/audit_hook.py preCompact",
-        "powershell": "if (Get-Command python -ErrorAction SilentlyContinue) { python .github/hooks/scripts/audit_hook.py preCompact } else { py -3 .github/hooks/scripts/audit_hook.py preCompact }; exit $LASTEXITCODE",
-        "cwd": ".",
-        "timeoutSec": 30
-      }
-    ],
-    "subagentStop": [
-      {
-        "type": "command",
-        "bash": "py=$(command -v python3 || command -v python); \"$py\" .github/hooks/scripts/audit_hook.py subagentStop",
-        "powershell": "if (Get-Command python -ErrorAction SilentlyContinue) { python .github/hooks/scripts/audit_hook.py subagentStop } else { py -3 .github/hooks/scripts/audit_hook.py subagentStop }; exit $LASTEXITCODE",
-        "cwd": ".",
-        "timeoutSec": 30
-      }
-    ],
-    "errorOccurred": [
-      {
-        "type": "command",
-        "bash": "py=$(command -v python3 || command -v python); \"$py\" .github/hooks/scripts/audit_hook.py errorOccurred",
-        "powershell": "if (Get-Command python -ErrorAction SilentlyContinue) { python .github/hooks/scripts/audit_hook.py errorOccurred } else { py -3 .github/hooks/scripts/audit_hook.py errorOccurred }; exit $LASTEXITCODE",
-        "cwd": ".",
-        "timeoutSec": 10
       }
     ]
   }
