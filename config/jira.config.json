@@ -1,0 +1,45 @@
+{
+  "base_url": "https://ecanarys.atlassian.net",
+  "deployment": "cloud",
+  "default_project": "AIST",
+  "allowed_projects": [
+    "AIST"
+  ],
+  "default_issue_type": "Story",
+  "allowed_issue_types": [
+    "Story"
+  ],
+  "default_labels": [
+    "snowflake",
+    "story-writer"
+  ],
+  "default_components": [],
+  "epic_link_field": "",
+  "fields": {
+    "acceptance_criteria": "customfield_10071",
+    "story_points": ""
+  },
+  "default_fields": {},
+  "required_sections": [
+    "Context / Why",
+    "Scope",
+    "Out of scope",
+    "Acceptance criteria",
+    "Definition of Ready",
+    "Definition of Done"
+  ],
+  "attachments": {
+    "enabled": true,
+    "allowed_extensions": [
+      ".xlsx",
+      ".docx",
+      ".pdf",
+      ".md",
+      ".txt",
+      ".csv"
+    ],
+    "max_mb": 10
+  },
+  "ca_bundle": "",
+  "timeout_seconds": 30
+}
