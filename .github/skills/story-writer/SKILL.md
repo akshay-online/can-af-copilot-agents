@@ -63,7 +63,7 @@ For each story in the map, create `.jira/drafts/<story-slug>/story.md` from the 
 5. **Attachments / documents file path:** the shared folder path (or `none`) and the original document names this story relies on.
 6. **Acceptance criteria** are `AC-n`, Given / When / Then, each checkable with a query or a count, covering only this story's scope.
 7. **Dependencies / links:** other stories from the map (with keys once created), the parent Feature/Epic key when supplied, access needed, and any remaining gap as `⚠ TBC – <question> (owner: PO/BA/tech lead)`. Ask the user about gaps first.
-8. **Names** follow `docs/STANDARDS.md` and `snowflake/claim_detail/` (`STG.<E>_STG`, `HIST.<E>_HIST`, `PRC.<E>`, `UTIL.SP_LOAD_STG_<E>` …). If neither exists in the repo, infer names from `examples/producer-contract-story.md` and confirm the proposed object names with the user in the interview before drafting.
+8. **Names** follow [the technical standards](../../STANDARDS.md) and `snowflake/claim_detail/` when present. If neither exists in the repo, infer names from `examples/producer-contract-story.md` and confirm the proposed object names with the user in the interview before drafting.
 9. **Front matter:** fill `summary` (max 255 chars), `labels`, `components`, and `parent` with the user's Feature or Epic key when provided. `sources` is internal traceability and is never sent to Jira. Leave `attachments: []`, `status: draft`, `project` empty and `jira_key` empty.
 10. Replace every `TODO`.
 
@@ -123,7 +123,7 @@ python .github/skills/jira-create-ticket/scripts/jira_create.py attach .jira/dra
 
 The command requires the confirmation issue key to match `jira_key`, verifies the exact filenames against the draft, validates type and size, uploads only files not already recorded in `uploaded_attachments`, and records successful uploads for safe retries. Report any failed files; never create the issue again. Then repeat Steps 4–7 for the next story in the map.
 
-After the last story, list every created key with its link. Suggested next step per story: `git checkout -b feature/<KEY>-<entity>`, then `/jira-ticket <KEY>` and `/dev <KEY> <ENTITY>`.
+After the last story, list every created key with its link. Suggested next step per story: `git checkout -b feature/<KEY>-<entity>`, supply `.jira/<KEY>/brief.md` and relevant specifications, then select **snowflake-developer** using [its SOP](../../../SOP_docs/snowflake-developer.md). No `/jira-ticket` or `/dev` prompt is supplied by this kit.
 
 ## What not to do
 

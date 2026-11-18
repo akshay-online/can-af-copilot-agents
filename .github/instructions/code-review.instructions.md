@@ -32,7 +32,7 @@ Review every changed SQL file against these rules. Label each comment **[BLOCKER
 
 ## MINOR
 - Formatting: lowercase keywords, one-line column lists, leading commas, missing column comments.
-- Naming not matching `docs/STANDARDS.md` §2.
+- Naming not matching [the technical standards](../STANDARDS.md) §2.
 - Long procedures (> ~300 lines) that should be split per layer.
 
 ## Performance notes (comment, don't block)
@@ -41,5 +41,5 @@ Review every changed SQL file against these rules. Label each comment **[BLOCKER
 - `ORDER BY` in an `INSERT … SELECT`.
 
 ## Don't comment on
-- Style choices already allowed by `docs/STANDARDS.md`.
+- Style choices already allowed by [the technical standards](../STANDARDS.md).
 - Files under `docs/` or `.github/` unless they contain secrets.

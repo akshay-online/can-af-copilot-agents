@@ -19,7 +19,7 @@ Policies: `snowflake/common/03_masking_policies.sql`. Per-entity attachment: `sn
 | GENERIC | `UTIL.MP_GENERIC` | VARCHAR | SHA-256 (joinable) |
 
 ## Rules
-1. Sensitivity comes from the business's sensitivity rules (often a Word or Excel attachment on the ticket; `/jira-ticket` converts it to text) → `DATA_CLASS` in the spec. If a column looks sensitive but isn't marked, **ask** — don't decide alone.
+1. Sensitivity comes from the business's sensitivity rules (often a Word or Excel attachment supplied with the ticket; use [spec-file-conversion](../spec-file-conversion/SKILL.md)) → `DATA_CLASS` in the spec. If a column looks sensitive but isn't marked, **ask** — don't decide alone.
 2. Attach to **staging, history and processing** (`… SET MASKING POLICY … FORCE` so the script re-runs).
 3. Policy input type must equal the column type. A `TIMESTAMP` DOB needs a `MP_DOB_TS` variant — add it to the common file, don't inline a policy in an entity script.
 4. Every policy returns clear values for `<LOAD_ROLE>` (JS7 loads) — otherwise SCD2 hashes and stores masked data.

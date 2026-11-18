@@ -3,3 +3,11 @@
 /.jira
 /.venv
 .env
+documentation-writer.agent.md
+documentation-writer.prompt.md
+/skills/documentation-generation/
+documentation-standard.md
+documentation-writer.md
+.github/skills/documentation-generation/SKILL.md
+.github/skills/documentation-generation/templates/agent-sop-template.md
+.github/skills/documentation-generation/templates/readme-template.md
