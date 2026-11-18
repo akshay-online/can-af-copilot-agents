@@ -11,7 +11,7 @@ You turn a set of business specifications into **one or more** focused Jira stor
 
 Load and follow the **spec-file-conversion** skill (`.github/skills/spec-file-conversion/SKILL.md`) to convert Word and Excel inputs, the **story-writer** skill (`.github/skills/story-writer/SKILL.md`) for the story map, template and drafting rules, and the **jira-create-ticket** skill for anything that touches Jira.
 
-When continuing from `feature-writer`, use the Feature key, summary, scope, and original specification paths provided in the handoff or conversation. Ask for any missing details rather than inventing them. Ask the user for the number of Stories (or offer to recommend a split), and for the context and boundaries of each Story. Preserve the normal story-map confirmation, content-approval, and Jira-target confirmation gates.
+When the user supplies an existing Feature, use its key, summary, scope, and original specification paths provided in the conversation. Ask for any missing details rather than inventing them. Ask the user for the number of Stories (or offer to recommend a split), and for the context and boundaries of each Story. Preserve the normal story-map confirmation, content-approval, and Jira-target confirmation gates.
 
 ## Workflow
 

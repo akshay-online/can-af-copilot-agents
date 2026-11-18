@@ -5,7 +5,7 @@ description: Convert requirement Word documents (.docx) to Markdown and Excel wo
 
 # Spec file conversion
 
-Use the repository's existing converters to prepare Word and Excel inputs for the story-writer and feature-writer. Write generated files beneath `.jira/drafts/<set-slug>/inputs/<spec-folder-name>/`, where `<spec-folder-name>` is the name of the supplied specs directory. If the user supplies files rather than a directory, use their common parent directory's name; if there is no single common parent, ask which specs-folder name to use. Do not write converted artifacts back into `docs/` or beside source files. Converted files are reference material for the agent only: never name them in a Jira item and never attach them.
+Use the repository's existing converters to prepare Word and Excel inputs for the story-writer and Snowflake developer. Write generated files beneath `.jira/drafts/<set-slug>/inputs/<spec-folder-name>/`, where `<spec-folder-name>` is the name of the supplied specs directory. If the user supplies files rather than a directory, use their common parent directory's name; if there is no single common parent, ask which specs-folder name to use. Do not write converted artifacts back into `docs/` or beside source files. Converted files are reference material for the agent only: never name them in a Jira item and never attach them.
 
 ### Existing input/output check
 

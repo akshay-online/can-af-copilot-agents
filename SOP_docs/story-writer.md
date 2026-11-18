@@ -86,6 +86,5 @@ The [hook reference](guardrails.md) describes enforcement limits; hooks are not 
 - [Story prompt](../.github/prompts/story-writer.prompt.md)
 - [Story template](../.github/skills/story-writer/templates/story-template.md)
 - [Example Story](../.github/skills/story-writer/examples/producer-contract-story.md)
-- [Feature-writer SOP](feature-writer.md)
 - [Snowflake developer SOP](snowflake-developer.md)
 - [Repository overview](../README.md)

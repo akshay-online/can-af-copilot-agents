@@ -57,4 +57,4 @@ Tests cover supported approval/creation cases, protected paths, command rules, p
 | Hooks not visible in selected runtime | Check host support and customization loading; do not infer availability from files alone |
 | Hook exception or missing/bad policy | Report it to the maintainer; do not continue a sensitive write assuming protection |
 
-See the [README](../README.md), [Story SOP](story-writer.md), and [Feature SOP](feature-writer.md) for the corresponding human workflow.
+See the [README](../README.md) and [Story SOP](story-writer.md) for the corresponding human workflow.
