@@ -37,4 +37,4 @@ description: "Snowflake DDL rules for staging, history and processing tables"
 - Money: `NUMBER(p,s)`. Dates: `DATE`. Timestamps: `TIMESTAMP_NTZ(9)`. Strings keep spec length.
 - Sensitive columns (spec `DATA_CLASS` not blank): add a `-- MASKING: UTIL.MP_<DATA_CLASS>` comment on the column and an `ALTER TABLE … MODIFY COLUMN … SET MASKING POLICY` statement at the end of the file, for staging, history and processing tables in a separate file `ddl/04_masking_<entity>.sql`.
 - Never reference a hard-coded database. Schema-qualify with `STG.`, `HIST.`, `PRC.`, `UTIL.`, `AUDIT.` only.
-- Follow the reference implementation `snowflake/claim_detail/ddl/` file for file. Columns come only from the column spec (the `/jira-ticket` skill converts the xlsx attachment to `.jira/<KEY>/attachments/*.md`).
+- Follow the reference implementation `snowflake/claim_detail/ddl/` file for file when present; otherwise use [the technical standards](../STANDARDS.md) and these rules, asking about missing contracts. Columns come only from the column spec; use [spec-file-conversion](../skills/spec-file-conversion/SKILL.md) for Word/Excel inputs. No ticket-fetch skill is supplied.

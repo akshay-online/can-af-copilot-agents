@@ -5,7 +5,7 @@ description: "Rules for Snowflake JavaScript stored procedures (load, history, p
 
 # Snowflake JavaScript stored procedure rules
 
-Follow `docs/STANDARDS.md` and start every procedure from the matching procedure in `snowflake/claim_detail/procs/`. Copy the **standard helpers block** (`RESULT`, `exec`, `scalar`, `audit`, `validateRunDate`, `fail`) unchanged; do not introduce a second SQL-execution or audit pattern.
+Follow [the technical standards](../STANDARDS.md) and start every procedure from the matching procedure in `snowflake/claim_detail/procs/` when present. Copy the **standard helpers block** (`RESULT`, `exec`, `scalar`, `audit`, `validateRunDate`, `fail`) unchanged when available; do not introduce a second SQL-execution or audit pattern. If the reference is absent, follow the available rules and ask for any missing source/audit contracts before coding.
 
 ## File header
 
@@ -41,6 +41,6 @@ $$;
 ## Layer-specific logic
 - **Staging (Approach 1 — files):** `DELETE FROM STG.<ENTITY>` → `COPY INTO STG.<ENTITY> (cols) FROM (SELECT $1, $2 … FROM @UTIL.STG_<…>) FILE_FORMAT = (FORMAT_NAME = UTIL.FF_CSV_…) PATTERN = '<validated pattern>' ON_ERROR = ABORT_STATEMENT`. Apply the spec's date/time and null/normalization rules in the `SELECT`. `COPY INTO` options such as `PATTERN` do not accept bind placeholders: validate the run date against the expected format, then construct the pattern only from that validated date. Use `FORCE = TRUE` when staging is emptied before each run so retries reload the file. After `COPY INTO`, count staging rows with `SELECT COUNT(*)`; do not rely on a `rows_loaded` result column. See skill `file-ingestion`.
 - **Staging (Approach 2 — Snowflake source):** `DELETE FROM STG.<ENTITY>` → `INSERT INTO STG.<ENTITY> (cols) SELECT cols FROM <SHARE_DB>.<SCHEMA>.<TABLE> [WHERE <delta filter>]`. See skill `file-ingestion` (Approach 2 section).
-- **History:** follow skill `scd2-history-load`. In one transaction, expire changed current versions using a hash of all non-key business columns, expire missing keys only when the ticket's SNAPSHOT/DELTA rules require it, then insert current versions for new and changed keys. Validate staging business keys as in the reference so duplicates or NULL keys cannot create invalid current versions. Keep effective dates and tracking columns consistent with `docs/STANDARDS.md`.
+- **History:** follow skill `scd2-history-load`. In one transaction, expire changed current versions using a hash of all non-key business columns, expire missing keys only when the ticket's SNAPSHOT/DELTA rules require it, then insert current versions for new and changed keys. Validate staging business keys as in the reference so duplicates or NULL keys cannot create invalid current versions. Keep effective dates and tracking columns consistent with [the technical standards](../STANDARDS.md).
 - **Processing:** `DELETE FROM PRC.<ENTITY> WHERE VALUATION_DATE = ?` → `INSERT … SELECT … FROM HIST.<ENTITY>_HIST WHERE CURRENT_RECORD_IND = 'Y'` (plus the month filter the ticket defines).
 - **Orchestrator `SP_RUN_<ENTITY>`:** call staging, history, then processing in that order. Bind procedure arguments, stop on the first failure, and return the result from each layer. Do not add scheduling logic; JS7 calls the orchestrator.
